@@ -1,0 +1,50 @@
+import util.
+
+main =>
+    println("Small"),
+    Small = get_grid("in.small"),
+    printf("Part 1: %w\n", solve_part_1(Small)),
+    printf("Part 2: %w\n", solve_part_2(Small)),
+    println("Full"),
+    Full = get_grid("in"),
+    printf("Part 1: %w\n", solve_part_1(Full)),
+    printf("Part 2: %w\n", solve_part_2(Full)).
+
+grid_coordinates(Grid) = [(I, J) : I in 1..len(Grid), J in 1..len(Grid[I])].
+
+get_grid(File) = Grid =>
+    Lines = read_file_lines(File),
+    Grid = new_set([ (I, J)
+    : (I, J) in grid_coordinates(Lines)
+    , Lines[I, J] == '@'
+    ]).
+
+solve_part_1(Grid) = Result =>
+    Accessible = [ 1
+    : Keys = Grid.keys()
+    , (I, J) in Keys
+    , Adj = get_adjacent(Grid, I, J)
+    , len(Adj) < 4
+    ],
+    Result = len(Accessible).
+
+solve_part_2(Grid) = Result =>
+    Result = 0,
+    Accessible = [],
+    do
+        Accessible := [ 1
+        : Keys = Grid.keys()
+        , (I, J) in Keys
+        , Adj = get_adjacent(Grid, I, J)
+        , len(Adj) < 4
+        , Grid.del((I, J))
+        ],
+        Result := Result + len(Accessible)
+    while (len(Accessible) > 0).
+
+get_adjacent(Grid, I, J) = Adj =>
+    Adj = [ 1
+    : X in -1..1, Y in -1..1
+    , ( X != 0 ; Y != 0)
+    , Grid.has_key((I+X, J+Y))
+    ]

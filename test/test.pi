@@ -1,0 +1,19 @@
+import util.
+
+main =>
+    Cases = [[to_int(C) : C in split(Line)] : Line in read_file_lines("in")],
+    println(len([1 : Case in Cases, is_safe(Case)])),
+    println(len([1 : Case in Cases, is_any_safe(Case)])).
+
+is_safe(Case) =>
+    Diffs = [Case[I] - Case[I-1] : I in 2..len(Case)],
+    Sign = sign(Diffs[1]),
+    foreach (D in Diffs) abs(D) >= 1, abs(D) <= 3, D * Sign > 0 end.
+
+is_any_safe(Case) =>
+    between(0, len(Case), I),
+    Reduced = [Case[J] : J in 1..len(Case), J != I],
+    is_safe(Reduced).
+
+sign(X) = Sign =>
+    if X > 0 then Sign = 1 else Sign = -1

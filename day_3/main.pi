@@ -1,0 +1,44 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Lines = read_file_lines(File),
+    Joltages = [
+        [ 10*X+Y
+        : I in (1..len(Line)-1)
+        , X = to_int(Line[I])
+        , Rest = drop(Line, I)
+        , Y = max([to_int(C): C in Rest])
+        ]
+    : Line in Lines
+    ],
+    Maxes = [max(Joltage): Joltage in Joltages],
+    Result = sum(Maxes).
+
+solve_part_2(File) = Result =>
+    Lines = read_file_lines(File),
+    Joltages = [ find_best_joltage(Arr, len(Arr), 12)
+    : Line in Lines
+    , Nums = [ to_int(C) : C in Line ]
+    , Arr = to_array(Nums)
+    ],
+    Result = sum(Joltages).
+
+table
+find_best_joltage(_, _, 0) = 0.
+find_best_joltage(Arr, Pos, Limit) = Result =>
+    Pos > 0,
+    H = Arr[Pos],
+    maxof(
+        ( Result = find_best_joltage(Arr, Pos-1, Limit - 1) * 10 + H
+        ; Result = find_best_joltage(Arr, Pos-1, Limit)
+        ),
+        Result
+    ).

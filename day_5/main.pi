@@ -1,0 +1,46 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Text = read_file_chars(File),
+    [RangesText, IngredientsText] = split(Text, "="),
+    Ranges = [ (to_int(Start), to_int(End))
+    : RangeLine in split(RangesText)
+    , [Start, End] = split(RangeLine, "-")
+    ],
+    Fresh = [ 1
+    : IngredientLine in split(IngredientsText)
+    , Ingredient = to_int(IngredientLine)
+    , InRanges = [ 1
+        : (Start, End) in Ranges
+        , Start <= Ingredient, Ingredient <= End
+        ]
+    , len(InRanges) > 0
+    ],
+    Result = len(Fresh).
+
+solve_part_2(File) = Result =>
+    Text = read_file_chars(File),
+    [ RangesText, _ ] = split(Text, "="),
+    Ranges = flatten([ [(to_int(Start), 1), (to_int(End)+1, -1)]
+    : RangeLine in split(RangesText)
+    , [Start, End] = split(RangeLine, "-")
+    ]),
+    SRanges = sort(Ranges, 1),
+    Result = 0,
+    Acc = 0,
+    Prev = 0,
+    foreach(( Curr, Arity ) in SRanges)
+        if Acc > 0 then
+            Result := Result + Curr - Prev
+        end,
+        Acc := Acc + Arity,
+        Prev := Curr
+    end.

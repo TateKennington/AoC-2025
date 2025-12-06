@@ -1,0 +1,54 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Lines = read_file_lines(File),
+    Dial = 50,
+    Result = 0,
+    foreach(Line in Lines)
+        C := take(Line, 1),
+        X := to_int(drop(Line, 1)),
+
+        if C == "L" then
+            Dial := Dial - X
+        else
+            Dial := Dial + X
+        end,
+
+        Dial := Dial mod 100,
+
+        if Dial == 0 then
+            Result := Result + 1
+        end
+    end.
+
+solve_part_2(File) = Result =>
+    Lines = read_file_lines(File),
+    Dial = 50,
+    Result = 0,
+    foreach(Line in Lines)
+        C := take(Line, 1),
+        X := to_int(drop(Line, 1)),
+
+        Result := Result + floor(X div 100),
+        X := X mod 100,
+
+        if C == "L" then
+            NextDial := Dial - X,
+        else
+            NextDial := Dial + X
+        end,
+
+        if NextDial > 99 || (NextDial < 0 && Dial != 0) || NextDial mod 100 == 0 then
+            Result := Result + 1
+        end,
+
+        Dial := NextDial mod 100,
+    end.

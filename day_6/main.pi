@@ -1,0 +1,41 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Lines = reverse(read_file_lines(File)),
+    Problems = transpose([ Rows
+    : Line in Lines
+    , Rows = split(Line)
+    ]),
+    Solutions = [ Solution
+    : Problem in Problems
+    , [ Operation | Rest ] = Problem
+    , Nums = [ to_int(NumString) : NumString in Rest ]
+    , Solution = cond(Operation = "+", sum(Nums), prod(Nums))
+    ],
+    Result = sum(Solutions).
+
+solve_part_2(File) = Result =>
+    Lines = read_file_lines(File),
+    OpLine = last(Lines),
+    NumLines = delete(Lines, OpLine),
+    Groups = [[]],
+    foreach(NumString in transpose(NumLines))
+        if len(strip(NumString)) == 0 then
+            Groups := [[]|Groups],
+        else
+            Groups[1] := [to_int(NumString) | Groups[1]]
+        end
+    end,
+    Solutions = [ Solution
+    : { Operation, Nums } in zip(split(OpLine), reverse(Groups))
+    , Solution = cond(Operation = "+", sum(Nums), prod(Nums))
+    ],
+    Result = sum(Solutions).

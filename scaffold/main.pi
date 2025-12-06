@@ -1,0 +1,15 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Lines = read_file_lines(File).
+
+solve_part_2(File) = Result =>
+    Lines = read_file_lines(File).

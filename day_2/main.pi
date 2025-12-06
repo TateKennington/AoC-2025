@@ -1,0 +1,52 @@
+import util.
+import math.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Lines = read_file_lines(File),
+    InvalidNums = [ X :
+        Line in Lines,
+        Range in split(Line, ","),
+        [Start, End] = split(Range,"-"),
+        X in to_int(Start)..to_int(End),
+        is_invalid(X)
+    ],
+    Result = sum(InvalidNums).
+
+is_invalid(A) =>
+    Digits = floor(log10(A))+1,
+    Digits mod 2 == 0,
+    I = Digits div 2,
+    Left = floor(A div (pow(10, I))),
+    Right = A mod (pow(10, I)),
+    Left == Right.
+
+solve_part_2(File) = Result =>
+    Lines = read_file_lines(File),
+    InvalidNums = [ X :
+        Line in Lines,
+        Range in split(Line, ","),
+        [Start, End] = split(Range,"-"),
+        X in to_int(Start)..to_int(End),
+        is_invalid_2(X)
+    ],
+    Result = sum(InvalidNums).
+
+is_invalid_2(A) =>
+    Digits = floor(log10(A))+1,
+    Digits > 1,
+    between(1, Digits div 2, I),
+    Head = A mod (pow(10, I)),
+    Head > 0,
+    Rest = floor(A div (pow(10, I))),
+    while (Rest > 0)
+        Rest mod (pow(10, I)) == Head,
+        Rest := floor(Rest div (pow(10, I)))
+    end.
