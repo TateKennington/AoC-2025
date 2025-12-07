@@ -1,0 +1,43 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Grid = read_file_lines(File),
+    find(Grid[1], "S", Start, _),
+    Result = count_splits(Grid, (1, Start)).
+
+
+count_splits(Grid, (Row, Col)) = Result =>
+    if Row > len(Grid); Col < 1 ; Col > len(Grid[Row]); Grid[Row, Col] == '|' then
+        Result = 0
+    else if Grid[Row, Col] == '^' then
+        Result = 1 + count_splits(Grid, (Row, Col - 1)) + count_splits(Grid, (Row, Col + 1))
+    else
+        Grid[Row, Col] := '|',
+        Result = count_splits(Grid, (Row + 1, Col))
+    end.
+
+solve_part_2(File) = Result =>
+    Grid = read_file_lines(File),
+    find(Grid[1], "S", Start, _),
+    Result = count_timelines(Grid, (1, Start)).
+
+
+table
+count_timelines(Grid, (Row, Col)) = Result =>
+    if Row > len(Grid) then
+        Result = 1
+    else if Col < 1 ; Col > len(Grid[Row]) then
+        Result = 0
+    else if Grid[Row, Col] == '^' then
+        Result = count_timelines(Grid, (Row, Col - 1)) + count_timelines(Grid, (Row, Col + 1))
+    else
+        Result = count_timelines(Grid, (Row + 1, Col))
+    end.
