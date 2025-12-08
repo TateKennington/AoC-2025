@@ -1,0 +1,80 @@
+import util.
+import math.
+
+main =>
+    println("Small"),
+    Small = parse_file("in.small"),
+    printf("Part 1: %w\n", solve_part_1(Small, 10)),
+    printf("Part 2: %w\n", solve_part_2(Small)),
+    println("Full"),
+    Full = parse_file("in"),
+    printf("Part 1: %w\n", solve_part_1(Full, 1000)),
+    printf("Part 2: %w\n", solve_part_2(Full)).
+
+parse_file(File) = (Coords, Nodes, Dists) =>
+    Lines = read_file_lines(File),
+    Coords = to_array([ (X, Y, Z)
+    : Line in Lines
+    , [X, Y, Z] = [ to_int(Part) : Part in split(Line, ",") ]
+    ]),
+    Nodes = to_array([ ( 0, 1 ) : Coord in Coords ]),
+    Dists = sort([ (Dist, From, To)
+    : From in 1..len(Coords)-1
+    , To in From+1..len(Coords)
+    , (X, Y, Z) = Coords[From]
+    , (A, B, C) = Coords[To]
+    , Dist = pow(X-A, 2) + pow(Y-B, 2) + pow(Z-C, 2)
+    ], 1).
+
+solve_part_1((Coords, Nodes, Dists), Connections) = Result =>
+    foreach(I in 1..Connections)
+        (_, From, To) = Dists[I],
+        union(Nodes, From, To)
+    end,
+    Circuits = reverse(sort([ Size
+    : Node in Nodes
+    , (Parent, Size) = Node
+    , Parent == 0
+    ])),
+    Result = prod(take(Circuits, 3)).
+
+solve_part_2((Coords, Nodes, Dists)) = Result =>
+    Circuits = 0,
+    Result = 0,
+    while(Circuits != 1)
+        [ Curr | Rest ] = Dists,
+        (_, From, To) = Curr,
+        union(Nodes, From, To),
+        Circuits := len([ 1 : Node in Nodes, (Parent, Size) = Node, Parent == 0 ]),
+        Dists := Rest,
+        if Circuits == 1 then
+            (XA, _, _) = Coords[From],
+            (XB, _, _) = Coords[To],
+            Result := XA * XB
+        end
+    end.
+
+union(Nodes, A, B) =>
+    RootA = find(Nodes, A),
+    RootB = find(Nodes, B),
+    if RootA != RootB then
+        (_, SizeA) = Nodes[RootA],
+        (_, SizeB) = Nodes[RootB],
+        if SizeA > SizeB then
+            Nodes[RootA] := (0, SizeA + SizeB),
+            Nodes[RootB] := (RootA, SizeB)
+        else
+            Nodes[RootA] := (RootB, SizeA),
+            Nodes[RootB] := (0, SizeA + SizeB)
+        end
+    end.
+
+find(Nodes, A) = Root =>
+    Index = A,
+    (Parent, _) = Nodes[Index],
+    while(Parent != 0)
+        Index := Parent,
+        (CurrParent, _) = Nodes[Index],
+        Parent := CurrParent
+    end,
+    Root = Index.
