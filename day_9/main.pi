@@ -1,0 +1,87 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Lines = read_file_lines(File),
+    Coords = [(X, Y)
+    : Line in Lines
+    , [X, Y] = [to_int(Part): Part in split(Line, ",")]
+    ],
+    Areas = [Area
+    : (XA, YA) in Coords
+    , (XB, YB) in Coords
+    , Area = (1+abs(XA-XB))*(1+abs(YA-YB))
+    ],
+    Result = max(Areas).
+
+solve_part_2(File) = Result =>
+    Lines = read_file_lines(File),
+    Coords = [(X, Y)
+    : Line in Lines
+    , [X, Y] = [to_int(Part): Part in split(Line, ",")]
+    ],
+
+    StartX = 0, StartY = 0,
+    Xs = sort_remove_dups([ X : (X, _) in [ (1000000, 1000000) | [ (StartX, StartY) | Coords ] ] ]),
+    Ys = sort_remove_dups([ Y : (_, Y) in [ (1000000, 1000000) | [ (StartX, StartY) | Coords ] ] ]),
+
+    XMap = new_map([X = I : I in 1..len(Xs), X = Xs[I]]),
+    YMap = new_map([Y = I : I in 1..len(Ys), Y = Ys[I]]),
+
+    Inside = new_set(),
+    foreach(I in 1..len(Coords))
+        (SX, SY) = map_coords(Coords[I], XMap, YMap),
+        (EX, EY) = map_coords(Coords[(I mod len(Coords)) + 1], XMap, YMap),
+        if SX == EX then
+            foreach(Y in min(SY, EY)..max(SY, EY)) put(Inside, (SX, Y)) end
+        else
+            foreach(X in min(SX,EX)..max(SX, EX)) put(Inside, (X, SY)) end
+        end
+    end,
+
+    Outside = new_set(),
+    MappedStart = map_coords((StartX, StartY), XMap, YMap),
+    Queue = [MappedStart],
+    put(Outside, MappedStart),
+    while(len(Queue) != 0)
+        [(CurrX, CurrY) | Rest] = Queue,
+        foreach(I in -1..1)
+            foreach(J in -1..1)
+                if not has_key(Inside, (CurrX + I, CurrY + J)), not has_key(Outside, (CurrX + I, CurrY + J)), CurrX + I > 0, CurrY + J > 0,CurrX + I <= len(Xs), CurrY + J <= len(Ys) then
+                    put(Outside, (CurrX + I, CurrY + J)),
+                    Rest := [(CurrX + I, CurrY + J) | Rest]
+                end
+            end
+        end,
+        Queue := Rest
+    end,
+    Result = 0,
+    Areas = sort_down([(Area, (XA, YA), (XB, YB))
+    : (XA, YA) in Coords
+    , (XB, YB) in Coords
+    , Area = (1+abs(XA-XB))*(1+abs(YA-YB))
+    ], 1),
+    do
+        [(Area, (XA, YA), (XB, YB)) | Rest] = Areas,
+        (MXA, MYA) = map_coords((XA, YA), XMap, YMap),
+        (MXB, MYB) = map_coords((XB, YB), XMap, YMap),
+        OutsideCount = len([1
+        : X in min(MXA, MXB)..max(MXA, MXB)
+        , Y in min(MYA, MYB)..max(MYA, MYB)
+        , has_key(Outside, (X, Y))
+        ]),
+        if OutsideCount == 0 then Result := Area end,
+        Areas := Rest
+    while(Result == 0).
+
+map_coords((X, Y), XMap, YMap) = Result =>
+    MX = get(XMap, X),
+    MY = get(YMap, Y),
+    Result = (MX, MY).

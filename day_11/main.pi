@@ -1,0 +1,38 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in2.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Lines = read_file_lines(File),
+    Adj = new_map([ Id=Rest
+    : Line in Lines
+    , [Id | Rest] = split(Line, " :")
+    ]),
+    Result = find_paths(Adj, "you", "out").
+
+solve_part_2(File) = Result =>
+    Lines = read_file_lines(File),
+    Adj = new_map([ Id=Rest
+    : Line in Lines
+    , [Id | Rest] = split(Line, " :")
+    ]),
+    Result = find_paths(Adj, "svr", "dac")*find_paths(Adj, "dac", "fft")*find_paths(Adj, "fft", "out")
+        + find_paths(Adj, "svr", "fft")*find_paths(Adj, "fft", "dac")*find_paths(Adj, "dac", "out").
+
+table
+find_paths(Adj, Curr, End) = Result =>
+    if Curr == End then
+        Result = 1
+    else if not has_key(Adj, Curr) then
+        Result = 0
+    else
+        Result = sum([find_paths(Adj, Next, End)
+        : Next in get(Adj, Curr)
+        ])
+    end.

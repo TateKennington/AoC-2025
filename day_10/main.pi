@@ -1,0 +1,103 @@
+import util.
+
+main =>
+    println("Small"),
+    printf("Part 1: %w\n", solve_part_1("in.small")),
+    printf("Part 2: %w\n", solve_part_2("in.small")),
+    println("Full"),
+    printf("Part 1: %w\n", solve_part_1("in")),
+    printf("Part 2: %w\n", solve_part_2("in")).
+
+solve_part_1(File) = Result =>
+    Lines = read_file_lines(File),
+    Problems = [ (Target, Buttons)
+    : Line in Lines
+    , [TargetString | Rest] = split(Line)
+    , [_ | ButtonStrings] = reverse(Rest)
+    , Target = parse_target(TargetString)
+    , Buttons = [ parse_button(ButtonString) : ButtonString in ButtonStrings]
+    ],
+    Result = sum([ Answer
+    : (Target, Buttons) in Problems
+    , Answer = find_presses(Target, Buttons)
+    ]).
+
+parse_target(String) = Result =>
+    Result = 0,
+    foreach(I in len(String)-1..-1..2)
+        Result := Result << 1,
+        if String[I] == '#' then Result := Result + 1 end
+    end.
+
+parse_button(String) = Result =>
+    Result = 0,
+    foreach(Part in split(slice(String, 2, len(String)-1), ","))
+        Result := Result + (1 << to_int(Part))
+    end.
+
+find_presses(Target, Buttons) = Result =>
+    Result = min([ popcount(Mask)
+    : Mask in 0..1<<len(Buttons)
+    , Target == calculate_mask(Mask, Buttons)
+    ]).
+
+calculate_mask(Mask, Buttons) = Result =>
+    Result = 0,
+    foreach(I in 0..len(Buttons)-1)
+        if (Mask /\ (1<<I)) > 0 then Result := Result ^ Buttons[I+1] end
+    end.
+
+popcount(Num) = Result =>
+    Result = 0,
+    while(Num > 0)
+        if Num /\ 1 > 0 then Result := Result + 1 end,
+        Num := Num >> 1
+    end.
+
+solve_part_2(File) = Result =>
+    Lines = read_file_lines(File),
+    Problems = [ (Joltage, Buttons)
+    : Line in Lines
+    , [_ | Rest] = split(Line)
+    , [JoltageString | ButtonStrings] = reverse(Rest)
+    , Joltage = parse_joltage(JoltageString)
+    , Buttons = [ parse_button_list(ButtonString, len(Joltage)) : ButtonString in ButtonStrings]
+    ],
+    %println(Problems),
+    Answers = [ Answer
+    : (Joltage, Buttons) in Problems
+    , Answer = find_joltage(Joltage, Buttons)
+    ],
+    %println(Answers),
+    Result = sum(Answers).
+
+parse_joltage(String) = Result =>
+    Result = [ to_int(Part)
+    : Part in split(slice(String, 2, len(String)-1), ",")
+    ].
+
+parse_button_list(String, Len) = Result =>
+    Result = new_list(Len, 0),
+    foreach(Part in split(slice(String, 2, len(String)-1), ","))
+        Result[to_int(Part)+1] := 1
+    end.
+
+find_joltage(Joltage, Buttons) = Result =>
+    Queue = [(0, Joltage)],
+    Seen = new_map(),
+    Result = 0,
+    while(Result == 0)
+        [(Steps, Curr) | Rest] = Queue,
+        if foreach(X in Curr) X==0 end then
+            Result := Steps
+        else
+            Next = [(Steps + 1, NextJoltage)
+            : Button in Buttons
+            , NextJoltage = [A-B: {A,B} in zip(Curr, Button)]
+            , foreach(X in NextJoltage) X >= 0 end
+            , (not has_key(Seen, NextJoltage) ; Steps + 1 < get(Seen, NextJoltage))
+            , put(Seen, NextJoltage, Steps + 1)
+            ],
+            Queue := Rest ++ Next
+        end
+    end.
